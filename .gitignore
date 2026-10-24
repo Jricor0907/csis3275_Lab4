@@ -40,3 +40,10 @@ __screenshots__/
 
 .env
 .env.local
+
+# Spring Boot / Maven
+crs/target/
+crs/.classpath
+crs/.project
+crs/.settings/
+crs/.metadata/
