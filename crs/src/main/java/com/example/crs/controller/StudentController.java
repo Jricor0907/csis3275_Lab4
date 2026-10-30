@@ -90,6 +90,46 @@ public class StudentController {
                 .body("Invalid Student ID or password.");
     }
 
+@PostMapping("/remove")
+public ResponseEntity<Map<String, String>> removeAccount(
+        @RequestBody Student removeRequest) {
+
+    Map<String, String> response = new java.util.HashMap<>();
+
+    if (removeRequest == null
+            || isBlank(removeRequest.getStudentId())
+            || isBlank(removeRequest.getPassword())) {
+
+        response.put("message", "Student ID and password are required.");
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    String studentId = removeRequest.getStudentId();
+    Student student = students.get(studentId);
+
+    if (student == null) {
+        response.put("message", "Student ID does not exist.");
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    if (!student.getPassword().equals(removeRequest.getPassword())) {
+        response.put("message", "Incorrect password.");
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    if (!students.remove(studentId, student)) {
+        response.put("message", "Unable to remove student account.");
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    response.put("message", "Student account removed successfully.");
+    response.put("studentId", student.getStudentId());
+    response.put("name", student.getName());
+    response.put("email", student.getEmail());
+
+    return ResponseEntity.ok(response);
+}
+
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }

@@ -1,14 +1,12 @@
+import axios from "axios";
 
-import axios from 'axios';
-
-const API_URL = 'http://localhost:8080/api';
+const API_URL = "http://localhost:8080/api";
 
 class LoginService {
-
   login(studentId, password) {
     return axios.post(`${API_URL}/login`, {
       studentId,
-      password
+      password,
     });
   }
 
@@ -16,6 +14,9 @@ class LoginService {
     return axios.post(`${API_URL}/register`, student);
   }
 
+  remove(student) {
+    return axios.post(`${API_URL}/remove`, student);
+  }
 }
 
 export default new LoginService();

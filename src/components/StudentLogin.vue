@@ -1,4 +1,3 @@
-
 <template>
   <div class="login-container">
     <div class="edit-form">
@@ -7,27 +6,18 @@
       <form @submit.prevent="login">
         <div>
           <label for="studentId">Student ID:</label>
-          <input
-            type="text"
-            id="studentId"
-            v-model="studentLoginRequest.studentId"
-          />
+          <input type="text" id="studentId" v-model="studentLoginRequest.studentId" />
         </div>
 
         <div>
           <label for="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            v-model="studentLoginRequest.password"
-          />
+          <input type="password" id="password" v-model="studentLoginRequest.password" />
         </div>
 
         <div class="button-group">
           <button type="submit">Login</button>
-          <button type="button" @click="openCreateModal">
-            Create
-          </button>
+          <button type="button" @click="openCreateModal">Create</button>
+          <button type="button" @click="removeAccount" class="remove-btn">Remove</button>
         </div>
       </form>
 
@@ -46,11 +36,7 @@
 
           <div>
             <label>Password:</label>
-            <input
-              type="password"
-              v-model="newStudent.password"
-              required
-            />
+            <input type="password" v-model="newStudent.password" required />
           </div>
 
           <div>
@@ -60,18 +46,12 @@
 
           <div>
             <label>Email:</label>
-            <input
-              type="email"
-              v-model="newStudent.email"
-              required
-            />
+            <input type="email" v-model="newStudent.email" required />
           </div>
 
           <div class="button-group">
             <button type="submit">Submit</button>
-            <button type="button" @click="closeCreateModal">
-              Cancel
-            </button>
+            <button type="button" @click="closeCreateModal">Cancel</button>
           </div>
         </form>
       </div>
@@ -80,93 +60,122 @@
 </template>
 
 <script>
-import LoginService from '../services/LoginService';
+import LoginService from '../services/LoginService'
 export default {
-  name: "StudentLogin",
+  name: 'StudentLogin',
 
   data() {
     return {
       studentLoginRequest: {
-        studentId: "",
-        password: ""
+        studentId: '',
+        password: '',
       },
 
-      message: "",
+      message: '',
       showModal: false,
 
       newStudent: {
-        studentId: "",
-        password: "",
-        name: "",
-        email: ""
-      }
-    };
+        studentId: '',
+        password: '',
+        name: '',
+        email: '',
+      },
+    }
   },
 
   methods: {
-    
-async login() {
-  this.message = "";
+    async login() {
+      this.message = ''
 
-  try {
-    const response = await LoginService.login(
-      this.studentLoginRequest.studentId,
-      this.studentLoginRequest.password
-    );
+      try {
+        const response = await LoginService.login(
+          this.studentLoginRequest.studentId,
+          this.studentLoginRequest.password,
+        )
 
-    localStorage.setItem(
-      "sid",
-      this.studentLoginRequest.studentId
-    );
+        localStorage.setItem('sid', this.studentLoginRequest.studentId)
 
-    alert(response.data);
-  } catch (error) {
-    if (error.response) {
-      this.message = error.response.data;
-    } else {
-      this.message = "Cannot connect to the server.";
-    }
-  }
-},
+        alert(response.data)
+      } catch (error) {
+        if (error.response) {
+          this.message = error.response.data
+        } else {
+          this.message = 'Cannot connect to the server.'
+        }
+      }
+    },
 
+    async removeAccount() {
+      this.message = ''
 
+      if (!this.studentLoginRequest.studentId || !this.studentLoginRequest.password) {
+        alert('Please enter Student ID and password.')
+        return
+      }
+
+      if (
+        !confirm(`Are you sure you want to remove account: ${this.studentLoginRequest.studentId}?`)
+      ) {
+        return
+      }
+
+      try {
+        const response = await LoginService.remove(this.studentLoginRequest)
+
+        alert(
+          response.data.message +
+            '\nStudent ID: ' +
+            response.data.studentId +
+            '\nFull Name: ' +
+            response.data.name +
+            '\nEmail: ' +
+            response.data.email,
+        )
+
+        localStorage.removeItem('sid')
+        this.studentLoginRequest.studentId = ''
+        this.studentLoginRequest.password = ''
+        this.message = ''
+      } catch (error) {
+        if (error.response) {
+          alert(error.response.data.message)
+        } else {
+          alert('Cannot connect to the server.')
+        }
+      }
+    },
     openCreateModal() {
-      this.showModal = true;
+      this.showModal = true
     },
 
     closeCreateModal() {
-      this.showModal = false;
+      this.showModal = false
       this.newStudent = {
-        studentId: "",
-        password: "",
-        name: "",
-        email: ""
-      };
+        studentId: '',
+        password: '',
+        name: '',
+        email: '',
+      }
     },
+    async submitRegistration() {
+      this.message = ''
 
-    
-async submitRegistration() {
-  this.message = "";
+      try {
+        const response = await LoginService.register(this.newStudent)
 
-  try {
-    const response = await LoginService.register(
-      this.newStudent
-    );
+        alert(response.data)
 
-    alert(response.data);
-
-    this.closeCreateModal();
-
-  } catch (error) {
-    if (error.response) {
-      alert(error.response.data);
-    } else {
-      alert("Cannot connect to the server.");
-    }
-  }
+        this.closeCreateModal()
+      } catch (error) {
+        if (error.response) {
+          alert(error.response.data)
+        } else {
+          alert('Cannot connect to the server.')
+        }
+      }
+    },
+  },
 }
-  }
-};
 </script>
 
 <style scoped>
